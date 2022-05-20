@@ -1,0 +1,53 @@
+name: tvmaze-scraper
+
+extensions:
+  - name: seq
+    logPath: ./.logs
+
+services:
+  - name: api
+    project: ./api/api.csproj
+    bindings:
+      - protocol: http
+        port: 4000
+
+  - name: scraper
+    project: ./scraper/scraper.csproj
+    bindings:
+      - protocol: http
+        port: 4001
+
+  - name: mongodb
+    image: mongo
+    env:
+      - name: MONGO_INITDB_ROOT_USERNAME
+        value: root
+      - name: MONGO_INITDB_ROOT_PASSWORD
+        value: example
+      - name: MONGO_INITDB_DATABASE
+        value: TvMazeScraper
+    volumes:
+      - name: mongodb-volume-data
+        target: /var/lib/mongodb
+    bindings:
+      - port: 27016
+        containerPort: 27017
+        connectionString: "mongodb://root:example@${host}:${port}"
+
+  - name: mongo-express
+    image: mongo-express
+    env:
+      - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+        value: root
+      - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+        value: example
+      - name: ME_CONFIG_MONGODB_SERVER
+        value: host.docker.internal:27016
+      - name: ME_CONFIG_MONGODB_PORT
+        value: 27016
+      - name: restart
+        value: always
+    bindings:
+      - port: 8081
+        containerPort: 8081
+        protocol: http
