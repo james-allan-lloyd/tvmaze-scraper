@@ -11,8 +11,8 @@ var app = builder.Build();
 
 app.MapGet("/", () => "API");
 
-app.MapGet("/shows/", async ([FromServices] ShowCastReadRepository showCastRepository) => {
-    return Results.Ok(await showCastRepository.getShowCasts());
+app.MapGet("/shows", async ([FromServices] ShowCastReadRepository showCastRepository, int? page, int? size) => {
+    return Results.Ok(await showCastRepository.getShowCasts(page ?? 1, size ?? 10));
 });
 
 app.Run();

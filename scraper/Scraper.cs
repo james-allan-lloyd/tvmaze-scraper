@@ -18,6 +18,7 @@ public class Scraper
 
 	public async Task scrape(CancellationToken stoppingToken)
 	{
+		var watch = System.Diagnostics.Stopwatch.StartNew();
 		int page = 0;
 		bool end = false;
 		while (!end)
@@ -34,6 +35,9 @@ public class Scraper
 			page += 1;
 			end = true;
 		}
+		// the code that you want to measure comes here
+		watch.Stop();
+		logger.LogInformation("Scraping done in {elapsedMs}s", watch.ElapsedMilliseconds/1.0e3);
 	}
 
 	private async Task processShowsPage(int page, ShowInfo showInfo, CancellationToken stoppingToken)

@@ -23,7 +23,7 @@ public class TvMazeClient : ITvMazeClient
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			var url = "https://api.tvmaze.com" + path;
-			logger.LogInformation("Requesting {url}", url);
+			// logger.LogInformation("Requesting {url}", url);
 			HttpResponseMessage response = await client.GetAsync(url);
 			switch (response.StatusCode)
 			{
