@@ -18,7 +18,7 @@ Scrape and serve data from TVMaze.
 [] sort on datetime in backend?
 [] async enumerable returns?
 [] fix _id to id
-[] handle people with null birthdays (id 6 Nocholas Strong)?
+[] handle people with null birthdays (id 6 Nicholas Strong)?
 [] test backOff behavior
 [] make common app framework
 [] process all pages
