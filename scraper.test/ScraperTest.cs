@@ -17,6 +17,7 @@ public class ScraperTest
 	private List<ShowInfo> dummyShowInfo;
 	private List<PersonInfo> dummyPersonInfo;
 	private List<CastInfo> dummyCastInfo;
+	private Mock<IShowCastRepository> mockShowCastRepository;
 
 	public ScraperTest(ITestOutputHelper output)
 	{
@@ -47,8 +48,9 @@ public class ScraperTest
       },
     };
 
-
 		dummyCastInfo = dummyPersonInfo.Select(personInfo => new CastInfo { person = personInfo }).ToList();
+
+		mockShowCastRepository = new Mock<IShowCastRepository>();
 	}
 
   private void setupMockResponse<T>(string path, T result)
@@ -59,18 +61,41 @@ public class ScraperTest
 
 
   [Fact]
-  public async Task itLoadsPagesAsync()
+  public async Task itLoadsPages()
   {
 		setupMockResponse("/shows?page=0", dummyShowInfo);
 		setupMockResponse("/shows/1/cast", dummyCastInfo);
 		setupMockResponse("/shows/2/cast", dummyCastInfo);
 
-		var scraper = new Scraper(_output.BuildLoggerFor<Scraper>(), mockMazeClient.Object);
+		var scraper = new Scraper(_output.BuildLoggerFor<Scraper>(), mockMazeClient.Object, mockShowCastRepository.Object);
 
 		await scraper.scrape(CancellationToken.None);
 
 		scraper.MaxPage.Should().Be(0);
 		scraper.MaxShow.Should().Be(2);
+	}
+
+  [Fact]
+  public async Task itStoresShowCastDocument()
+  {
+		setupMockResponse("/shows?page=0", dummyShowInfo);
+		setupMockResponse("/shows/1/cast", dummyCastInfo);
+		setupMockResponse("/shows/2/cast", dummyCastInfo);
+
+		var actualDocuments = new List<ShowInfo>();
+		mockShowCastRepository.Setup(showCastRepository => showCastRepository.upsert(It.IsAny<ShowInfo>()))
+		  .Callback<ShowInfo>((showInfo) => actualDocuments.Add(showInfo));
+		dummyShowInfo[0].cast.Should().BeEmpty();
+
+		var scraper = new Scraper(_output.BuildLoggerFor<Scraper>(), mockMazeClient.Object, mockShowCastRepository.Object);
+
+		await scraper.scrape(CancellationToken.None);
+
+		var expectedDocuments = dummyShowInfo.Select(showInfo => new ShowInfo { id = showInfo.id, name = showInfo.name, cast = dummyPersonInfo }).ToList();
+
+		actualDocuments.Should().BeEquivalentTo(expectedDocuments);
+
+		//mockShowCastRepository.Verify(showCastRepository => showCastRepository.upsert(expectedDocument[1]), Times.Once());
 	}
 
   // itSkipsIfCastListNotFound

@@ -1,20 +1,19 @@
-using System.Net;
-
 namespace scraper;
 
 public class Scraper
 {
 	private readonly ILogger<Scraper> logger;
 	private readonly ITvMazeClient mazeClient;
+	private readonly IShowCastRepository showCastRepository;
 
 	public int MaxShow { get; private set; } = 0;
 	public int MaxPage { get; private set; } = 0;
 
-
-	public Scraper(ILogger<Scraper> logger, ITvMazeClient mazeClient)
+	public Scraper(ILogger<Scraper> logger, ITvMazeClient mazeClient, IShowCastRepository showCastRepository)
 	{
 		this.logger = logger;
 		this.mazeClient = mazeClient;
+		this.showCastRepository = showCastRepository;
 	}
 
 	public async Task scrape(CancellationToken stoppingToken)
@@ -54,9 +53,11 @@ public class Scraper
 			else
 			{
 				// add to mongo document
+				showInfo.cast.Add(castInfo.person);
 			}
 		}
 		// commit mongo document
+		await showCastRepository.upsert(showInfo);
 		MaxPage = Math.Max(MaxPage, page);
 		MaxShow = Math.Max(MaxShow, showInfo.id);
 	}

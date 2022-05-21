@@ -5,6 +5,7 @@ using scraper;
 var builder = WebApplication.CreateBuilder(args);
 setupLogging(builder);
 
+builder.Services.AddSingleton<IShowCastRepository, ShowCastRepository>();
 builder.Services.AddSingleton<ITvMazeClient, TvMazeClient>();
 builder.Services.AddSingleton<Scraper>();
 builder.Services.AddHostedService<ScraperService>();
