@@ -1,10 +1,13 @@
 using System.Reflection;
 using Serilog;
+using scraper;
 
 var builder = WebApplication.CreateBuilder(args);
 setupLogging(builder);
 
-builder.Services.AddHostedService<Scraper>();
+builder.Services.AddSingleton<ITvMazeClient, TvMazeClient>();
+builder.Services.AddSingleton<Scraper>();
+builder.Services.AddHostedService<ScraperService>();
 
 var app = builder.Build();
 

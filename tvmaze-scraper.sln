@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "api", "api\api.csproj", "{A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scraper", "scraper\scraper.csproj", "{402D5FE0-7B8F-4E55-9805-C755D3477184}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scraper.test", "scraper.test\scraper.test.csproj", "{F8782EE2-2B1A-4416-A435-EC26C80DA898}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{402D5FE0-7B8F-4E55-9805-C755D3477184}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{402D5FE0-7B8F-4E55-9805-C755D3477184}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{402D5FE0-7B8F-4E55-9805-C755D3477184}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8782EE2-2B1A-4416-A435-EC26C80DA898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8782EE2-2B1A-4416-A435-EC26C80DA898}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8782EE2-2B1A-4416-A435-EC26C80DA898}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8782EE2-2B1A-4416-A435-EC26C80DA898}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

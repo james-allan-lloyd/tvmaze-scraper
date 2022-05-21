@@ -5,6 +5,9 @@ Scrape and serve data from TVMaze.
 [x] initial project setup with tye
 [x] get a page of shows from the https://api.tvmaze.com/shows
 [x] get cast list for the shows /shows/:id/cast
+[x] setup testing
+[] create showCast repository
+[] generate mongo documents
 [] convert birthday to datetime
 [] implement endpoint
 [] sort on datetime in backend?
