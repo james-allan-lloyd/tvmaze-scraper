@@ -8,11 +8,13 @@ Scrape and serve data from TVMaze.
 [x] setup testing
 [x] create showCast repository
 [x] generate mongo documents
-[] implement endpoint
+[x] implement endpoint
 [] add pagination to endpoint
-[] handle people with null birthdays (id 6 Nocholas Strong)
 [] convert birthday to datetime
 [] sort on datetime in backend?
+[] async enumerable returns?
+[] fix _id to id
+[] handle people with null birthdays (id 6 Nocholas Strong)?
 [] time page processing and log it
 [] test backOff behavior
 [] make common app framework

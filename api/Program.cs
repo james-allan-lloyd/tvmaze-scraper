@@ -1,12 +1,19 @@
 using System.Reflection;
 using Serilog;
+using api;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 setupLogging(builder);
+builder.Services.AddSingleton<ShowCastReadRepository>();
 
 var app = builder.Build();
 
 app.MapGet("/", () => "API");
+
+app.MapGet("/shows/", async ([FromServices] ShowCastReadRepository showCastRepository) => {
+    return Results.Ok(await showCastRepository.getShowCasts());
+});
 
 app.Run();
 
