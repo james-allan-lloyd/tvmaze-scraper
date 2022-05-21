@@ -2,7 +2,7 @@ using System.Net;
 
 namespace scraper;
 
-public partial class Scraper
+public class Scraper
 {
 	private readonly ILogger<Scraper> logger;
 	private readonly ITvMazeClient mazeClient;
