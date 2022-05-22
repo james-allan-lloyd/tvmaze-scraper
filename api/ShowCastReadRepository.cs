@@ -5,6 +5,7 @@ namespace api;
 
 public interface IShowCastReadRepository
 {
+	public Task<List<object>> getShowCasts(int page, int pageSize);
 }
 
 

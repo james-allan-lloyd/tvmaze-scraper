@@ -28,6 +28,15 @@ Scrape and serve data from TVMaze.
 [] crash if we get too many unexpected status codes?
 
 
-## Out of Scope
+# Decisions
+## Storage
+- Store documents as view optimized, denormalised data
+	- Easy to update
+	- Assume the tv maze data is consistent itself
+	- Alternative: normalise the person data, join on serve
+
+
+
+# Out of Scope
 * Auth
 * Swagger
