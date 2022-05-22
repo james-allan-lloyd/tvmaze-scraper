@@ -11,17 +11,18 @@ Scrape and serve data from TVMaze.
 [x] implement endpoint
 [x] time page processing and log it
 [x] add pagination to endpoint
-[] add api tests
-[] api page parameter should be 1 or greater
-[] api size parameter should be 1 or greater
+[x] add api tests
+[x] api page parameter should be 1 or greater
+[x] api size parameter should be 1 or greater
+[] fix _id to id
+[] process all pages
+[] use fluent assertions for api, return more than 1 error
 [] convert birthday to datetime
 [] sort on datetime in backend?
 [] async enumerable returns?
-[] fix _id to id
 [] handle people with null birthdays (id 6 Nicholas Strong)?
 [] test backOff behavior
 [] make common app framework
-[] process all pages
 [] implement parallel processing?
 [] implement rate limiting?
 [] implement updating

@@ -12,6 +12,14 @@ var app = builder.Build();
 app.MapGet("/", () => "API");
 
 app.MapGet("/shows", async ([FromServices] IShowCastReadRepository showCastRepository, int? page, int? size) => {
+	if(page <= 0)
+	{
+		return Results.BadRequest(new {error = "Invalid page: should be greater than zero"});
+	}
+	if(size <= 0)
+	{
+		return Results.BadRequest(new {error = "Invalid size: should be greater than zero"});
+	}
     return Results.Ok(await showCastRepository.getShowCasts(page ?? 1, size ?? 10));
 });
 
