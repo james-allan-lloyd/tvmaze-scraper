@@ -23,6 +23,9 @@ CONNECTIONSTRINGS__MONGODB=mongodb://root:password@localhost:27016
 - [x] api page parameter should be 1 or greater
 - [x] api size parameter should be 1 or greater
 - [ ] fix _id to id
+	- `.Project("{_id: 0, id: \"$_id\", name: \"$name\", cast: \"$cast\"}")`
+	  works for show id but not person... :/
+	- map on conversion from bson to json?
 - [x] process all pages
 - [ ] ~~cache person to cut down on number of queries?~~
 	- should be cached by the edge server, they say...
