@@ -16,12 +16,13 @@ Scrape and serve data from TVMaze.
 - [x] api size parameter should be 1 or greater
 - [ ] fix _id to id
 - [x] process all pages
+- [ ] process all shows, then all people
 - [ ] cache person to cut down on number of queries?
 	- should be cached by the edge server, they say...
 	- are we asking for cached results?
 - [ ] use fluent assertions for api, return more than 1 error
 - [ ] convert birthday to datetime
-- [ ] sort on datetime in backend?
+- [x] sort on datetime in backend?
 - [ ] async enumerable returns?
 - [ ] handle people with null birthdays (id 6 Nicholas Strong)?
 - [ ] test backOff behavior

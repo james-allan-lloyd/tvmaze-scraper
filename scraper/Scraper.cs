@@ -70,6 +70,8 @@ public class Scraper
 				showInfo.cast.Add(castInfo.person);
 			}
 		}
+
+		showInfo.cast.Sort((x, y) => (x.birthday ?? "").CompareTo(y.birthday ?? ""));
 		// commit mongo document
 		await showCastRepository.upsert(showInfo);
 		MaxPage = Math.Max(MaxPage, page);
