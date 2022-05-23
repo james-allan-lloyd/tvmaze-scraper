@@ -19,10 +19,12 @@ public class Scraper
 	public async Task scrape(CancellationToken stoppingToken)
 	{
 		var watch = System.Diagnostics.Stopwatch.StartNew();
-		int page = 0;
+		int page = showCastRepository.lastPageCompleted() + 1;
+		int maxPage = 5;
 		bool end = false;
 		while (!end)
 		{
+			logger.LogInformation("Started processing page {page}", page);
 			List<ShowInfo>? showInfoPage = await mazeClient.requestJsonWithBackoff<List<ShowInfo>>($"/shows?page={page}", stoppingToken);
 			if(showInfoPage != null)
 			{
@@ -31,9 +33,17 @@ public class Scraper
 					// TODO Batch processing here:
 					await processShowsPage(page, showInfo, stoppingToken);
 				}
+				await showCastRepository.completePage(page);
+				logger.LogInformation("Completed processing page {page}", page);
+			}
+			else
+			{
+				end = true;
+				logger.LogInformation("Data ended at page {page}", page);
 			}
 			page += 1;
-			end = true;
+			if(page > maxPage)
+				end = true;
 		}
 		// the code that you want to measure comes here
 		watch.Stop();

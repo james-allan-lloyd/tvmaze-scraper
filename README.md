@@ -15,7 +15,10 @@ Scrape and serve data from TVMaze.
 [x] api page parameter should be 1 or greater
 [x] api size parameter should be 1 or greater
 [] fix _id to id
-[] process all pages
+[x] process all pages
+[] cache person to cut down on number of queries? should be cached by the edge
+	server, they say...
+	are we asking for cached results?
 [] use fluent assertions for api, return more than 1 error
 [] convert birthday to datetime
 [] sort on datetime in backend?
@@ -27,6 +30,7 @@ Scrape and serve data from TVMaze.
 [] implement rate limiting?
 [] implement updating
 [] crash if we get too many unexpected status codes?
+[] test client status codes
 
 
 # Decisions
