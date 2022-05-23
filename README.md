@@ -1,6 +1,14 @@
 # TVMaze Scraper
 Scrape and serve data from TVMaze.
 
+This project uses tye to run (https://github.com/dotnet/tye). It should be able
+to be run manually, but you'll need to set the following environment variable
+with the correct values for your mongo db instance.
+
+```
+CONNECTIONSTRINGS__MONGODB=mongodb://root:password@localhost:27016
+```
+
 ## TODO
 - [x] initial project setup with tye
 - [x] get a page of shows from the https://api.tvmaze.com/shows
@@ -16,12 +24,14 @@ Scrape and serve data from TVMaze.
 - [x] api size parameter should be 1 or greater
 - [ ] fix _id to id
 - [x] process all pages
-- [ ] process all shows, then all people
-- [ ] cache person to cut down on number of queries?
+- [ ] ~~cache person to cut down on number of queries?~~
 	- should be cached by the edge server, they say...
 	- are we asking for cached results?
+	- we're not asking for person, we're asking for cast
+- [ ] process all shows, then all people
 - [ ] use fluent assertions for api, return more than 1 error
-- [ ] convert birthday to datetime
+- [ ] ~~convert birthday to datetime~~
+	- already in correct format
 - [x] sort on datetime in backend?
 - [ ] async enumerable returns?
 - [ ] handle people with null birthdays (id 6 Nicholas Strong)?
