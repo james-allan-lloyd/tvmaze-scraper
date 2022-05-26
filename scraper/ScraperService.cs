@@ -24,8 +24,8 @@ public class ScraperService : BackgroundService
 			logger.LogError(e, "Scraper exited with exception: {what}", e.Message);
 		}
 
-		// var updateInterval = TimeSpan.FromHours(1);
-		var updateInterval = TimeSpan.FromSeconds(1);
+		var updateInterval = TimeSpan.FromHours(1);
+		// var updateInterval = TimeSpan.FromSeconds(1);
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			DateTime nextUpdate = DateTime.UtcNow + updateInterval;
