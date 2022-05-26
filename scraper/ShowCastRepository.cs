@@ -7,7 +7,9 @@ public interface IShowCastRepository
 {
 	Task upsert(ShowInfo showInfo);
 	Task completePage(string name, int page);
-	public Task<int> lastPageCompleted(string name);
+	Task<int> lastPageCompleted(string name);
+	Task setLastUpdateTime(string name, ulong lastUpdateTime);
+	Task<UInt64> lastMaxUpdate(string name);
 }
 
 
@@ -17,9 +19,8 @@ public class ShowCastRepository : IShowCastRepository
 		[BsonId]
 		public string name { get; set; } = "";
 		public int lastPageCompleted { get; set; } = -1;
+		public UInt64 lastUpdateTimestamp { get; set; } = 0;
 	}
-
-	private ProcessInfo processInfo = new();
 
 	private MongoClient mongoClient;
 	private IMongoDatabase mongoDatabase;
@@ -40,26 +41,39 @@ public class ShowCastRepository : IShowCastRepository
 	}
 
 	public async Task<int> lastPageCompleted(string name) {
-		processInfo = await processCollection.Find<ProcessInfo>(c => c.name == name).FirstOrDefaultAsync();
-		if (processInfo is null)
-		{
-			logger.LogInformation("start of processing for {name}", name);
-			return -1;
-		}
-		else
-		{
-			logger.LogInformation("last completed page for {name} is {page}", name, processInfo.lastPageCompleted);
-			return processInfo.lastPageCompleted;
-		}
+		ProcessInfo processInfo = await getProcessInfo(name);
+		logger.LogInformation("last completed page for {name} is {page}", name, processInfo.lastPageCompleted);
+		return processInfo.lastPageCompleted;
+	}
+
+	private async Task<ProcessInfo> getProcessInfo(string name)
+	{
+		return await processCollection.Find<ProcessInfo>(c => c.name == name).FirstOrDefaultAsync() ?? new ProcessInfo();
 	}
 
 	public async Task completePage(string name, int page)
 	{
-		await processCollection.ReplaceOneAsync(c => c.name == name, new ProcessInfo { name = name, lastPageCompleted = page}, new ReplaceOptions { IsUpsert = true });
+		ProcessInfo processInfo = await getProcessInfo(name);
+		processInfo.lastPageCompleted = page;
+		await processCollection.ReplaceOneAsync(c => c.name == name, processInfo, new ReplaceOptions { IsUpsert = true });
 	}
 
 	public async Task upsert(ShowInfo showInfo)
 	{
 		await showCastCollection.ReplaceOneAsync(c => c.id == showInfo.id, showInfo, new ReplaceOptions { IsUpsert = true });
+	}
+
+	public async Task setLastUpdateTime(string name, ulong lastUpdateTime)
+	{
+		ProcessInfo processInfo = await getProcessInfo(name);
+		processInfo.lastUpdateTimestamp = lastUpdateTime;
+		await processCollection.ReplaceOneAsync(c => c.name == name, processInfo, new ReplaceOptions { IsUpsert = true });
+	}
+
+	public async Task<UInt64> lastMaxUpdate(string name)
+	{
+		ProcessInfo processInfo = await getProcessInfo(name);
+		logger.LogInformation("last completed page for {name} is {page}", name, processInfo.lastPageCompleted);
+		return processInfo.lastUpdateTimestamp;
 	}
 }

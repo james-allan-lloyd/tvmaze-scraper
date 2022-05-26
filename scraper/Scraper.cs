@@ -13,7 +13,7 @@ public class Scraper
 		this.logger = logger;
 		this.mazeClient = mazeClient;
 		this.showCastRepository = showCastRepository;
-		// this.maxPage = 5;
+		this.maxPage = 5;
 	}
 
 
@@ -56,11 +56,57 @@ public class Scraper
 	}
 
 
+	public static DateTime UnixTimeStampToDateTime(UInt64 unixTimeStamp )
+	{
+		// Unix timestamp is seconds past epoch
+		DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+		dateTime = dateTime.AddSeconds( unixTimeStamp ).ToLocalTime();
+		return dateTime;
+	}
+
+
 	public async Task scrape(CancellationToken stoppingToken)
 	{
 		await scrapePages<ShowInfo>("/shows", stoppingToken, processShowInfo);
-		// await scrapePages<PersonInfo>("/people", stoppingToken, processPersonInfo);
+		// await scrapePages<PersonInfo>("/people", stoppingToken,
+		// processPersonInfo);
 	}
+
+	public async Task update(CancellationToken stoppingToken)
+	{
+		logger.LogInformation("Starting updates...");
+		var watch = System.Diagnostics.Stopwatch.StartNew();
+		int updatesDone = 0;
+		var showUpdates = await mazeClient.requestJsonWithBackoff<Dictionary<string, UInt64>>("/updates/shows?since=day", stoppingToken);
+		if (showUpdates is null)
+		{
+			logger.LogWarning("Failed to get updates (null was returned)");
+			return;
+		}
+		var lastMaxUpdate = await showCastRepository.lastMaxUpdate("/shows");
+		foreach (var update in showUpdates!)
+		{
+			var showId = update.Key;
+			if (update.Value > lastMaxUpdate)
+			{
+				var showInfo = await mazeClient.requestJsonWithBackoff<ShowInfo>($"/shows/{showId}", stoppingToken);
+				if (showInfo is null)
+				{
+					logger.LogWarning("Failed to get show info for {showId}", showId);
+				}
+				else
+				{
+					await getShowCastInfo(showInfo, stoppingToken);
+					await showCastRepository.upsert(showInfo);
+					++updatesDone;
+				}
+			}
+		}
+		await showCastRepository.setLastUpdateTime("/shows", showUpdates.Values.Max());
+		watch.Stop();
+		logger.LogInformation("{count} updates done in {elapsedMs}s", updatesDone, watch.ElapsedMilliseconds/1.0e3);
+	}
+
 
 	private Task processPersonInfo(int page, PersonInfo personInfo, CancellationToken stoppingToken)
 	{
@@ -77,6 +123,7 @@ public class Scraper
 
 	private async Task getShowCastInfo(ShowInfo showInfo, CancellationToken stoppingToken)
 	{
+		// List<CastInfo>? castInfoList = await mazeClient.requestEmbedded<List<CastInfo>>($"/shows/{showInfo.id}?embed=cast", "cast", stoppingToken);
 		List<CastInfo>? castInfoList = await mazeClient.requestJsonWithBackoff<List<CastInfo>>($"/shows/{showInfo.id}/cast", stoppingToken);
 		if(castInfoList == null)
 		{
