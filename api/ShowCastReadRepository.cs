@@ -29,9 +29,18 @@ public class ShowCastReadRepository : IShowCastReadRepository
 		var documents = await showCastCollection.Find(new BsonDocument())
 			.Skip((page - 1) * pageSize)
 			.Limit(pageSize)
-			.Project("{_id: 0, id: \"$_id\", name: \"$name\", cast: \"$cast\"}")
 			.ToListAsync();
 		logger.LogInformation("Returning {count} show casts, requested size {count}", documents.Count, pageSize);
+		foreach(var show in documents)
+		{
+			show["id"] = show["_id"];
+			show.Remove("_id");
+			foreach(var person in show["cast"].AsBsonArray)
+			{
+				person["id"] = person["_id"];
+				person.AsBsonDocument.Remove("_id");
+			}
+		}
 		return documents.ConvertAll(BsonTypeMapper.MapToDotNetValue);
 	}
 }
