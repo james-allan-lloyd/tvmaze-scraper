@@ -28,7 +28,7 @@ services:
         value: TvMazeScraper
     volumes:
       - name: mongodb-volume-data
-        target: /var/lib/mongodb
+        target: /data/db
     bindings:
       - port: 27016
         containerPort: 27017
