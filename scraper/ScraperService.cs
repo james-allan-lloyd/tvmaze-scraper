@@ -17,7 +17,6 @@ public class ScraperService : BackgroundService
 		try
 		{
 			await scraper.scrape(stoppingToken);
-			logger.LogInformation("Scraping done (max page: {maxPage}, show: {maxShow})", scraper.MaxPage, scraper.MaxShow);
 		}
 		catch(Exception e)
 		{

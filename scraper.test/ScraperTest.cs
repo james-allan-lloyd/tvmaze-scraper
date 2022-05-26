@@ -52,7 +52,7 @@ public class ScraperTest
 		dummyCastInfo = dummyPersonInfo.Select(personInfo => new CastInfo { person = personInfo }).ToList();
 
 		mockShowCastRepository = new Mock<IShowCastRepository>();
-		mockShowCastRepository.Setup(repo => repo.lastPageCompleted()).Returns(-1);
+		setupLastProcessedPage("/shows", -1);
 	}
 
 	void setupMockResponse<T>(string path, T result)
@@ -77,10 +77,10 @@ public class ScraperTest
 		}
 	}
 
-	void setupLastProcessedPage(int page)
+	void setupLastProcessedPage(string endpoint, int page)
 	{
 		mockShowCastRepository = new Mock<IShowCastRepository>();
-		mockShowCastRepository.Setup(repo => repo.lastPageCompleted()).Returns(page);
+		mockShowCastRepository.Setup(repo => repo.lastPageCompleted(endpoint)).Returns(Task.FromResult(page));
 	}
 
 
@@ -90,19 +90,6 @@ public class ScraperTest
 		  .Callback<ShowInfo>(callback);
 	}
 
-
-	[Fact]
-	public async Task itLoadsPages()
-	{
-		setupPages(1);
-
-		var scraper = new Scraper(_output.BuildLoggerFor<Scraper>(), mockMazeClient.Object, mockShowCastRepository.Object);
-
-		await scraper.scrape(CancellationToken.None);
-
-		scraper.MaxPage.Should().Be(0);
-		scraper.MaxShow.Should().Be(2);
-	}
 
 	[Fact]
 	public async Task itStoresShowCastDocument()
@@ -131,7 +118,7 @@ public class ScraperTest
 
 		await scraper.scrape(CancellationToken.None);
 
-		mockShowCastRepository.Verify(repo => repo.completePage(0), Times.Once());
+		mockShowCastRepository.Verify(repo => repo.completePage("/shows", 0), Times.Once());
 	}
 
 
@@ -141,7 +128,7 @@ public class ScraperTest
 		int pageCount = 3;
 		int startPage = 1;
 		setupPages(pageCount, showsPerPage: 2);
-		setupLastProcessedPage(startPage);
+		setupLastProcessedPage("/shows", startPage);
 
 		int pagesToComplete = pageCount - startPage - 1; // pages are 0 indexed
 
@@ -152,7 +139,7 @@ public class ScraperTest
 
 		await scraper.scrape(CancellationToken.None);
 
-		mockShowCastRepository.Verify(repo => repo.completePage(It.IsAny<int>()), Times.Exactly(pagesToComplete));
+		mockShowCastRepository.Verify(repo => repo.completePage("/shows", It.IsAny<int>()), Times.Exactly(pagesToComplete));
 	}
 
 	// itSkipsIfCastListNotFound

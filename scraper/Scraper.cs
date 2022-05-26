@@ -5,52 +5,77 @@ public class Scraper
 	private readonly ILogger<Scraper> logger;
 	private readonly ITvMazeClient mazeClient;
 	private readonly IShowCastRepository showCastRepository;
+	private readonly int? maxPage = default;
 
-	public int MaxShow { get; private set; } = 0;
-	public int MaxPage { get; private set; } = 0;
 
 	public Scraper(ILogger<Scraper> logger, ITvMazeClient mazeClient, IShowCastRepository showCastRepository)
 	{
 		this.logger = logger;
 		this.mazeClient = mazeClient;
 		this.showCastRepository = showCastRepository;
+		// this.maxPage = 5;
 	}
 
-	public async Task scrape(CancellationToken stoppingToken)
+
+	// TODO: make endpoint a template that we subst page into
+	public async Task scrapePages<T>(string endpoint, CancellationToken stoppingToken, Func<int, T, CancellationToken, Task> process)
 	{
 		var watch = System.Diagnostics.Stopwatch.StartNew();
-		int page = showCastRepository.lastPageCompleted() + 1;
-		int maxPage = 5;
+
+		string name = endpoint;
+		int page = await showCastRepository.lastPageCompleted(name) + 1;
 		bool end = false;
-		while (!end)
+		int entities = 0;
+		int pages = 0;
+		while (!end && (maxPage is null || page < maxPage))
 		{
-			logger.LogInformation("Started processing page {page}", page);
-			List<ShowInfo>? showInfoPage = await mazeClient.requestJsonWithBackoff<List<ShowInfo>>($"/shows?page={page}", stoppingToken);
-			if(showInfoPage != null)
+			logger.LogInformation("Started processing {name} page {page}", name, page);
+			List<T>? pageData = await mazeClient.requestJsonWithBackoff<List<T>>(endpoint + "?page=" + page, stoppingToken);
+			if(pageData != null)
 			{
-				foreach (var showInfo in showInfoPage)
+				foreach (var entity in pageData)
 				{
 					// TODO Batch processing here:
-					await processShowsPage(page, showInfo, stoppingToken);
+					await process(page, entity, stoppingToken);
+					entities += 1;
 				}
-				await showCastRepository.completePage(page);
-				logger.LogInformation("Completed processing page {page}", page);
+				await showCastRepository.completePage(name, page);
+				pages += 1;
+				logger.LogInformation("Completed processing {name} page {page}", name, page);
 			}
 			else
 			{
 				end = true;
-				logger.LogInformation("Data ended at page {page}", page);
+				logger.LogInformation("Data for {name} ended at page {page}", name, page);
 			}
 			page += 1;
-			if(page > maxPage)
-				end = true;
 		}
-		// the code that you want to measure comes here
+
 		watch.Stop();
-		logger.LogInformation("Scraping done in {elapsedMs}s", watch.ElapsedMilliseconds/1.0e3);
+		logger.LogInformation("Scraping done in {elapsedMs}s: new pages {pages}, new entities {entities}", watch.ElapsedMilliseconds/1.0e3, pages, entities);
 	}
 
-	private async Task processShowsPage(int page, ShowInfo showInfo, CancellationToken stoppingToken)
+
+	public async Task scrape(CancellationToken stoppingToken)
+	{
+		await scrapePages<ShowInfo>("/shows", stoppingToken, processShowInfo);
+		// await scrapePages<PersonInfo>("/people", stoppingToken, processPersonInfo);
+	}
+
+	private Task processPersonInfo(int page, PersonInfo personInfo, CancellationToken stoppingToken)
+	{
+		return Task.CompletedTask;
+	}
+
+	private async Task processShowInfo(int page, ShowInfo showInfo, CancellationToken stoppingToken)
+	{
+		await getShowCastInfo(showInfo, stoppingToken);
+		showInfo.cast.Sort((x, y) => (y.birthday ?? "").CompareTo(x.birthday ?? ""));
+		// commit mongo document
+		await showCastRepository.upsert(showInfo);
+	}
+
+	private async Task getShowCastInfo(ShowInfo showInfo, CancellationToken stoppingToken)
 	{
 		List<CastInfo>? castInfoList = await mazeClient.requestJsonWithBackoff<List<CastInfo>>($"/shows/{showInfo.id}/cast", stoppingToken);
 		if(castInfoList == null)
@@ -70,11 +95,5 @@ public class Scraper
 				showInfo.cast.Add(castInfo.person);
 			}
 		}
-
-		showInfo.cast.Sort((x, y) => (x.birthday ?? "").CompareTo(y.birthday ?? ""));
-		// commit mongo document
-		await showCastRepository.upsert(showInfo);
-		MaxPage = Math.Max(MaxPage, page);
-		MaxShow = Math.Max(MaxShow, showInfo.id);
 	}
 }
