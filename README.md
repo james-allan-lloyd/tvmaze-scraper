@@ -48,8 +48,10 @@ CONNECTIONSTRINGS__MONGODB=mongodb://root:password@localhost:27016
 	- `.Project("{_id: 0, id: \"$_id\", name: \"$name\", cast: \"$cast\"}")`
 	  works for show id but not person... :/
 	- map on conversion from bson to json?
+- [x] remove duplicate people (people that played more than one role in a given
+  show)
+	- see https://api.tvmaze.com/shows/2/cast Amy Acker
 - [ ] generalize the _id renaming from BSon
-- [ ] remove duplicate people (people that played more than one role in a given show)
 - [ ] remove extra call in update (do it all with the ?embed=cast endpoint)
 - [ ] make common app framework
 - [ ] implement parallel processing?

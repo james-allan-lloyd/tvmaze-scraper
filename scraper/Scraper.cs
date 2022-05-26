@@ -136,6 +136,11 @@ public class Scraper
 			{
 				logger.LogWarning("Non person cast member for show {showId}", showInfo.id);
 			}
+			else if(showInfo.cast.Find(c => c.id == castInfo.person.id) != null)
+			{
+				// skip duplicate persons
+				continue;
+			}
 			else
 			{
 				// add to mongo document
