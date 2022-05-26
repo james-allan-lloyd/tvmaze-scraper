@@ -16,8 +16,10 @@ public interface IShowCastRepository
 public class ShowCastRepository : IShowCastRepository
 {
 	class ProcessInfo {
+		public ProcessInfo(string name) => this.name = name;
+
 		[BsonId]
-		public string name { get; set; } = "";
+		public string name { get; init; }
 		public int lastPageCompleted { get; set; } = -1;
 		public UInt64 lastUpdateTimestamp { get; set; } = 0;
 	}
@@ -48,7 +50,7 @@ public class ShowCastRepository : IShowCastRepository
 
 	private async Task<ProcessInfo> getProcessInfo(string name)
 	{
-		return await processCollection.Find<ProcessInfo>(c => c.name == name).FirstOrDefaultAsync() ?? new ProcessInfo();
+		return await processCollection.Find<ProcessInfo>(c => c.name == name).FirstOrDefaultAsync() ?? new ProcessInfo(name);
 	}
 
 	public async Task completePage(string name, int page)
